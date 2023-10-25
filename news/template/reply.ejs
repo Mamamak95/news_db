@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <p>댓글</p>
+  <hr>
+  <div id="replyForm">
+    <textarea name="replyContent" id="replyContent" style="width:95%"></textarea><br>
+    <button type="button" id="btnRegReply" onclick="regReply('<%= newsContent.nid %>')">등록완료</button>
+  </div>
+  <ul id="replyList"></ul>
+
+  <script>
+    replyList('<%= newsContent.nid %>');
+
+    function replyList(nid){   //맨처음 호출되는 리스트 출력함수
+      fetch('/reply/'+nid) 
+      .then(response => response.json())
+      .then((rlist) => {
+        // alert(JSON.stringify(rlist));
+        const output = `${rlist.map(reply => `
+            <li>${reply.replyContent}</li>
+          `).join('\n')}`;
+        document.querySelector("#replyList").innerHTML = output;
+      })
+      .catch()
+    }
+
+    /**
+     * 댓글 등록
+     */
+    function regReply(nid){
+      const replyContent = document.querySelector('#replyContent').value;
+      
+      fetch('/reply', {
+        method : 'post',
+        headers : {'content-type' : 'application/json'},
+        body : JSON.stringify({nid : nid, content : replyContent})
+      })
+      .then(response => {
+          if(response.status === 201){
+            window.location.reload();  //reply.js 재호출 --> replyList 함수 실행
+          }
+      })
+      .catch()
+    }
+
+  </script>
+
+</body>
+</html>
